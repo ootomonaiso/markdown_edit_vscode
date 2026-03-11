@@ -15,9 +15,19 @@
     "commands": [
       {
         "command": "markdowngo.openEditor",
-        "title": "MarkdownGo: エディターを開く"
+        "title": "MarkdownGo: エディターを開く",
+        "icon": "$(open-preview)"
       }
     ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "markdowngo.openEditor",
+          "when": "resourceLangId == markdown && activeEditor != workbench.editor.custom",
+          "group": "navigation"
+        }
+      ]
+    },
     "customEditors": [
       {
         "viewType": "markdowngo.editor",

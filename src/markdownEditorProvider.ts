@@ -6,8 +6,16 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
     public async resolveCustomTextEditor(
         document: vscode.TextDocument,
         webviewPanel: vscode.WebviewPanel,
-        _token: vscode.CancellationToken
+        token: vscode.CancellationToken
     ): Promise<void> {
+        // キャンセルチェック
+        if (token.isCancellationRequested) {
+            return;
+        }
+
+        // Webviewの破棄状態を追跡
+        let isDisposed = false;
+
         webviewPanel.webview.options = {
             enableScripts: true,
             localResourceRoots: [
@@ -19,10 +27,18 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
         // ドキュメントの内容をWebviewに送信
         const updateWebview = () => {
-            webviewPanel.webview.postMessage({
-                type: 'update',
-                content: document.getText()
-            });
+            if (isDisposed) {
+                return;
+            }
+            try {
+                webviewPanel.webview.postMessage({
+                    type: 'update',
+                    content: document.getText()
+                });
+            } catch (e) {
+                // Webviewが既に閉じられている場合は無視
+                console.warn('Failed to post message to webview:', e);
+            }
         };
 
         // 初期コンテンツを送信
@@ -35,21 +51,37 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
             }
         });
 
-        webviewPanel.onDidDispose(() => {
+        // キャンセルトークンの監視
+        const tokenDisposable = token.onCancellationRequested(() => {
+            isDisposed = true;
             changeDocumentSubscription.dispose();
+        });
+
+        webviewPanel.onDidDispose(() => {
+            isDisposed = true;
+            changeDocumentSubscription.dispose();
+            tokenDisposable.dispose();
         });
 
         // Webviewからのメッセージを処理
         webviewPanel.webview.onDidReceiveMessage(async message => {
+            if (isDisposed) {
+                return;
+            }
             switch (message.type) {
                 case 'edit': {
-                    const edit = new vscode.WorkspaceEdit();
-                    edit.replace(
-                        document.uri,
-                        new vscode.Range(0, 0, document.lineCount, 0),
-                        message.content
-                    );
-                    await vscode.workspace.applyEdit(edit);
+                    try {
+                        const edit = new vscode.WorkspaceEdit();
+                        edit.replace(
+                            document.uri,
+                            new vscode.Range(0, 0, document.lineCount, 0),
+                            message.content
+                        );
+                        await vscode.workspace.applyEdit(edit);
+                    } catch (e) {
+                        // 編集が失敗した場合（ドキュメントが閉じられたなど）は無視
+                        console.warn('Failed to apply edit:', e);
+                    }
                     break;
                 }
             }
@@ -88,14 +120,9 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
         <button data-action="quote" title="引用">" 引用</button>
         <button data-action="code" title="コード">&lt;/&gt;</button>
         <button data-action="link" title="リンク">🔗</button>
-        <span class="separator"></span>
-        <button data-action="preview" title="プレビュー切替">👁 プレビュー</button>
     </div>
-    <div class="editor-container">
-        <div class="editor-pane">
-            <textarea id="editor" placeholder="Markdownを入力..."></textarea>
-        </div>
-        <div class="preview-pane" id="preview"></div>
+    <div class="editor-wrapper">
+        <div id="editor" class="live-editor"></div>
     </div>
     <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>

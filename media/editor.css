@@ -61,82 +61,71 @@ html, body {
     margin: 0 8px;
 }
 
-.editor-container {
-    display: flex;
+/* Live Editor Styles */
+.editor-wrapper {
     height: calc(100% - 50px);
+    overflow-y: auto;
+    padding: 16px 24px;
 }
 
-.editor-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--border-color);
-}
-
-.editor-pane textarea {
-    flex: 1;
-    width: 100%;
-    padding: 16px;
-    background-color: var(--input-bg);
-    color: var(--text-color);
-    border: none;
-    resize: none;
-    font-family: var(--vscode-editor-font-family, monospace);
-    font-size: var(--vscode-editor-font-size, 14px);
-    line-height: 1.6;
+.live-editor {
+    min-height: 100%;
     outline: none;
 }
 
-.editor-pane textarea::placeholder {
-    color: var(--vscode-input-placeholderForeground);
-}
-
-.preview-pane {
-    flex: 1;
-    padding: 16px;
-    overflow-y: auto;
-    background-color: var(--bg-color);
-    display: none;
-}
-
-.preview-pane.visible {
-    display: block;
-}
-
-.preview-pane h1,
-.preview-pane h2,
-.preview-pane h3,
-.preview-pane h4,
-.preview-pane h5,
-.preview-pane h6 {
-    margin-top: 24px;
-    margin-bottom: 16px;
-    font-weight: 600;
-    line-height: 1.25;
-}
-
-.preview-pane h1 {
-    font-size: 2em;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.3em;
-}
-
-.preview-pane h2 {
-    font-size: 1.5em;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.3em;
-}
-
-.preview-pane h3 {
-    font-size: 1.25em;
-}
-
-.preview-pane p {
-    margin-bottom: 16px;
+.live-editor .line {
+    min-height: 1.6em;
     line-height: 1.6;
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: text;
 }
 
-.preview-pane code {
+/* 編集中の行 */
+.live-editor .line.editing {
+    background-color: var(--vscode-editor-lineHighlightBackground);
+    border: 1px solid var(--vscode-editor-lineHighlightBorder, transparent);
+    font-family: var(--vscode-editor-font-family, monospace);
+    outline: none;
+}
+
+/* プレビュー行 */
+.live-editor .line.preview {
+    font-family: var(--vscode-font-family);
+}
+
+.live-editor .line.preview:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+/* 見出しスタイル */
+.live-editor .h1 {
+    display: block;
+    font-size: 2em;
+    font-weight: 600;
+    margin: 0.67em 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3em;
+}
+
+.live-editor .h2 {
+    display: block;
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 0.83em 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3em;
+}
+
+.live-editor .h3 {
+    display: block;
+    font-size: 1.25em;
+    font-weight: 600;
+    margin: 1em 0;
+}
+
+/* インライン要素 */
+.live-editor code {
     background-color: var(--vscode-textCodeBlock-background);
     padding: 2px 6px;
     border-radius: 3px;
@@ -144,91 +133,48 @@ html, body {
     font-size: 0.9em;
 }
 
-.preview-pane pre {
-    background-color: var(--vscode-textCodeBlock-background);
-    padding: 16px;
-    border-radius: 6px;
-    overflow-x: auto;
-    margin-bottom: 16px;
+.live-editor strong {
+    font-weight: 700;
 }
 
-.preview-pane pre code {
-    background: none;
-    padding: 0;
+.live-editor em {
+    font-style: italic;
 }
 
-.preview-pane blockquote {
-    margin: 0 0 16px 0;
-    padding: 0 16px;
-    border-left: 4px solid var(--vscode-textBlockQuote-border);
-    color: var(--vscode-textBlockQuote-foreground);
-}
-
-.preview-pane ul,
-.preview-pane ol {
-    margin-bottom: 16px;
-    padding-left: 2em;
-}
-
-.preview-pane li {
-    margin-bottom: 4px;
-}
-
-.preview-pane a {
+.live-editor a {
     color: var(--vscode-textLink-foreground);
     text-decoration: none;
 }
 
-.preview-pane a:hover {
+.live-editor a:hover {
     text-decoration: underline;
 }
 
-.preview-pane img {
-    max-width: 100%;
-    height: auto;
+/* 引用 */
+.live-editor .blockquote {
+    display: block;
+    padding-left: 16px;
+    border-left: 4px solid var(--vscode-textBlockQuote-border);
+    color: var(--vscode-textBlockQuote-foreground);
 }
 
-.preview-pane hr {
+/* リスト */
+.live-editor .list-item {
+    display: block;
+    padding-left: 1em;
+}
+
+/* 水平線 */
+.live-editor hr {
     border: none;
     border-top: 1px solid var(--border-color);
-    margin: 24px 0;
+    margin: 16px 0;
 }
 
-.preview-pane table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-bottom: 16px;
-}
-
-.preview-pane th,
-.preview-pane td {
-    border: 1px solid var(--border-color);
-    padding: 8px 12px;
-    text-align: left;
-}
-
-.preview-pane th {
-    background-color: var(--toolbar-bg);
-    font-weight: 600;
-}
-
-/* Split view mode */
-.editor-container.split .editor-pane,
-.editor-container.split .preview-pane {
-    display: flex;
-    flex: 1;
-}
-
-.editor-container.split .preview-pane {
+/* 画像 */
+.live-editor .inline-img {
+    max-width: 100%;
+    height: auto;
     display: block;
-}
-
-/* Preview only mode */
-.editor-container.preview-only .editor-pane {
-    display: none;
-}
-
-.editor-container.preview-only .preview-pane {
-    display: block;
-    flex: 1;
+    margin: 8px 0;
 }
